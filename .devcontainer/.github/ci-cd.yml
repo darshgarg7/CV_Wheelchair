@@ -60,4 +60,4 @@ jobs:
     steps:
       - name: Send notification
         run: |
-          echo "Deployment Complete. Notify team!"
+          echo "Deployment Complete!"

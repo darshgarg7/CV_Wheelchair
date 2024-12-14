@@ -1,0 +1,63 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/devcontainers/python:1-3.12-bullseye
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Lint Python code
+        run: |
+          pip install flake8 black
+          black --check /Users/Darsh/Documents/GitHub/CV_Wheelchair/
+          flake8 /Users/Darsh/Documents/GitHub/CV_Wheelchair/
+
+      - name: Run tests with coverage
+        run: |
+          pip install pytest pytest-cov
+          pytest --cov=/Users/Darsh/Documents/GitHub/CV_Wheelchair/
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Set up AWS CLI
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set default.region us-east-1
+
+      - name: Deploy model to S3
+        run: |
+          python deployment_utils.py
+
+      - name: Verify deployment
+        run: python verify_deployment.py
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Send notification
+        run: |
+          echo "Deployment Complete. Notify team!"

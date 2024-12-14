@@ -1,0 +1,17 @@
+// For config options, see README at: https://github.com/devcontainers/templates/tree/main/src/python
+{
+	"name": "Python 3",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+
+	"features": {
+		"ghcr.io/devcontainers/features/python:1": {
+		  "version": "3.12"
+		}
+	},
+
+	"postCreateCommand": "pip3 install -r requirements.txt",
+	"forwardPorts": [8000],
+	"remoteUser": "vscode"
+}

@@ -37,12 +37,11 @@ class GestureRecognition:
             3: "Turn Right", 
         }
     
-    @staticmethod
     def predict_gesture(self, frame: np.ndarray) -> Optional[str]:
         """
         Predicts the gesture from the provided video frame.
         """
-        processed_frame = self._preprocess_frame(frame)
+        processed_frame = GestureRecognition._preprocess_frame(frame)
         predictions = self.model.predict(processed_frame)
         class_index = np.argmax(predictions)
         confidence = predictions[0][class_index]

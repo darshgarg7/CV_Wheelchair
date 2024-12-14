@@ -1,0 +1,30 @@
+# Reporting Issues
+If you encounter bugs or unexpected behavior, please create an issue in the repository:
+
+1. Go to the Issues tab.
+2. Click "New Issue" and provide:
+
+- A clear description of the problem.
+- Steps to reproduce the issue.
+- Any error messages or logs.
+- Relevant environment details (e.g., Python version, dependencies).
+
+
+# Submitting Changes
+When submitting a pull request (PR), please make sure your changes:
+
+- Address the issue or enhancement clearly.
+- Are properly tested.
+- Follow the style guide outlined below.
+- Include a detailed explanation in the PR description.
+
+I will review your pull request and provide feedback. If everything looks good, I will merge your changes!
+
+
+# Contributing
+
+As the sole contributor to this project, all development and maintenance is currently managed by me.
+If you'd like to discuss potential improvements or contribute ideas, feel free to open an issue or reach out directly.
+Thank you for your interest in my project!
+
+- Darsh Garg

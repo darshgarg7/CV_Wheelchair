@@ -7,7 +7,6 @@ import RPi.GPIO as GPIO
 from queue import Queue
 import time
 
-
 class WheelchairController:
     """
     Controls wheelchair movement based on hand gesture recognition.
@@ -23,8 +22,12 @@ class WheelchairController:
         self.frame_queue = Queue(maxsize=10)
         self._initialize_gpio()
 
+        # Initialize Gesture Recognition Thread
+        self.gesture_recognition_thread = GestureRecognitionThread(self.frame_queue, self)
+
+        # Start the frame capture and gesture recognition threads
         self.capture_thread = threading.Thread(target=self._capture_frames, daemon=True)
-        self.recognition_thread = threading.Thread(target=self._recognize_gestures, daemon=True)
+        self.recognition_thread = threading.Thread(target=self.gesture_recognition_thread.run, daemon=True)
 
     def _initialize_gpio(self):
         """
@@ -56,18 +59,6 @@ class WheelchairController:
                 self.frame_queue.put(frame)
             else:
                 logging.warning("Failed to capture or buffer full.")
-
-    def _recognize_gestures(self) -> None:
-        """
-        Recognizes gestures by retrieving frames from the queue.
-        """
-        while True:
-            if not self.frame_queue.empty():
-                frame = self.frame_queue.get()
-                gesture = self.gesture_recognizer.predict_gesture(frame)
-                if gesture:
-                    logging.info(f"Recognized gesture: {gesture}")
-                    self._handle_gesture(gesture)
 
     def _handle_gesture(self, gesture: str) -> None:
         """
@@ -118,8 +109,10 @@ class WheelchairController:
     def start(self) -> None:
         """ Starts the controller's main processes. """
         try:
+            # Start the capture and gesture recognition threads
             self.capture_thread.start()
             self.recognition_thread.start()
+            
             while True:
                 frame = self.frame_queue.get() if not self.frame_queue.empty() else None
                 if frame:
@@ -136,6 +129,33 @@ class WheelchairController:
         self.cap.release()
         cv2.destroyAllWindows()
         GPIO.cleanup()
+
+
+class GestureRecognitionThread(threading.Thread):
+    """
+    GestureRecognitionThread processes frames from the frame queue, makes gesture predictions,
+    and controls the wheelchair accordingly.
+    """
+    def __init__(self, frame_queue, wheelchair_controller):
+        """
+        Initializes the gesture recognition thread.
+        """
+        super().__init__()
+        self.frame_queue = frame_queue
+        self.wheelchair_controller = wheelchair_controller
+
+    def run(self):
+        """
+        Processes frames and makes gesture predictions in real-time.
+        """
+        while True:
+            if not self.frame_queue.empty():
+                frame = self.frame_queue.get()
+                gesture = self.wheelchair_controller.gesture_recognizer.predict_gesture(frame)
+                if gesture:
+                    logging.info(f"Recognized gesture: {gesture}")
+                    self.wheelchair_controller._handle_gesture(gesture)
+                    self.wheelchair_controller.db_manager.save_gesture(gesture)  # Save gesture to database
 
 
 if __name__ == "__main__":

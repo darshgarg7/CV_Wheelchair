@@ -45,6 +45,7 @@ def upload_model_to_s3(local_model_path, model_name, version, s3_bucket):
         s3_client = boto3.client('s3')
         s3_model_path = f'{model_name}/{version}/'
         
+        # Walk through the local model path and upload files to S3
         for root, files in os.walk(local_model_path):
             for file in files:
                 local_file_path = os.path.join(root, file)
@@ -61,4 +62,7 @@ def upload_model_to_s3(local_model_path, model_name, version, s3_bucket):
         raise
     except ClientError as e:
         logger.error(f"Error uploading to S3: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error during S3 upload: {e}")
         raise

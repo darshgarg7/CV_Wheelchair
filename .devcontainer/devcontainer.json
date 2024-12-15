@@ -4,14 +4,13 @@
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
-
 	"features": {
 		"ghcr.io/devcontainers/features/python:1": {
 		  "version": "3.12"
 		}
 	},
-
-	"postCreateCommand": "pip3 install -r requirements.txt",
+	"postCreateCommand": "",
 	"forwardPorts": [8000],
-	"remoteUser": "vscode"
+	"remoteUser": "vscode",
+	"workspaceFolder": "/workspace"
 }

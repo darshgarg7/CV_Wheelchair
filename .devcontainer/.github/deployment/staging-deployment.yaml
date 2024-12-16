@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cv-wheelchair-staging
+  labels:
+    app: cv-wheelchair
+spec:
+  replicas: 2  # You can adjust the number of replicas based on your needs
+  selector:
+    matchLabels:
+      app: cv-wheelchair
+  template:
+    metadata:
+      labels:
+        app: cv-wheelchair
+    spec:
+      containers:
+      - name: cv-wheelchair
+        image: ghcr.io/${{ github.repository_owner }}/cv_wheelchair:latest  # Using the latest image tag
+        ports:
+        - containerPort: 8080  # Change this to match the exposed port of your app
+        livenessProbe:
+          httpGet:
+            path: /health  # Ensure the /health endpoint is exposed by your app
+            port: 8080
+          initialDelaySeconds: 5  # Delay before checking
+          periodSeconds: 10  # Period between checks
+          failureThreshold: 3  # Number of failures before considering the container unhealthy
+        readinessProbe:
+          httpGet:
+            path: /health  # Ensures the container is ready before traffic is sent
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3

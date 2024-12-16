@@ -21,14 +21,14 @@ spec:
         - containerPort: 8000
         livenessProbe:
           httpGet:
-            path: https://<random-api-domain>/health
+            path: http://localhost:8000/health
             port: 8000
           initialDelaySeconds: 5
           periodSeconds: 10
           failureThreshold: 3
         readinessProbe:
           httpGet:
-            path: https://<random-api-domain>/health  # Ensures the container is ready before traffic is sent
+            path: http://localhost:8000/health  # Ensures the container is ready before traffic is sent
             port: 8000
           initialDelaySeconds: 5
           periodSeconds: 10

@@ -60,6 +60,7 @@ Database Management: The database.py file handles CRUD operations for gestures a
 - Add voice-command integration for enhanced usability.
 - Implement obstacle detection using ultrasonic sensors for safety.
 - Scale gesture recognition to support more complex commands.
+- Kubernetes for enabling scalable, automated container orchestration in production environments 🚀
 
 # **Contact Me 😃**
 - Darsh Garg

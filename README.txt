@@ -50,7 +50,7 @@ Database Management: The database.py file handles CRUD operations for gestures a
      - curl http://localhost:8000/health #Perform Health Check
 
 # **Testing**
-1. python -m unittest discover
+1. python3 -m unittest discover
 
 # **Contributing**
 - Please follow the guidelines in the CONTRIBUTING.txt for submitting issues and pull requests.

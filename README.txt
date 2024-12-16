@@ -34,7 +34,7 @@ Database Management: The database.py file handles CRUD operations for gestures a
    ```bash
    git clone https://github.com/darshgarg7/CV_Wheelchair.git
    cd CV_Wheelchair/.devcontainer
-2. **Build the Docker Container**:
+2. **Build the Docker Container (make sure Docker Desktop is running!)**:
    docker build -t cv_wheelchair /path/to/.devcontainer  #add path to .devcontainer
 
 ## **Usage (ensure you are in correct directory)**

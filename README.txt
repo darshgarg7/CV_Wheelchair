@@ -1,4 +1,4 @@
-s# Computer Vision Wheelchair with Gesture Augmentation
+# Computer Vision Wheelchair with Gesture Augmentation
 
 This repository implements a state-of-the-art gesture-controlled wheelchair system, combining EfficientNetB7 as a backbone for image classification, GAN-based synthetic data augmentation to handle class imbalances, and an IoT-powered control mechanism.
 The system integrates CI/CD pipelines for continuous deployment and is designed to showcase cutting-edge AI and software engineering practices in inclusive design and accessibility; there is a SQLite Database for storing gestures and logs with Django Integration.
@@ -28,11 +28,6 @@ Gestures Table: Stores gesture names, commands, and coordinates in JSON format.
 Logs Table: Tracks gesture recognition events with timestamps.
 Database Management: The database.py file handles CRUD operations for gestures and logs, while file_handler.py supports saving and loading gesture data from files.
 
-## **Project Structure**
-
-
-
-
 ## **Installation**
 1. **Clone the Repository**:
    ```bash
@@ -48,9 +43,6 @@ Database Management: The database.py file handles CRUD operations for gestures a
 4. python3 controller.py  #Run Wheelchair Controller
 5. python3 app.py #Run Server
      - curl http://localhost:8000/health #Perform Health Check
-
-# **Testing**
-1. python3 -m unittest discover
 
 # **Contributing**
 - Please follow the guidelines in the CONTRIBUTING.txt for submitting issues and pull requests.

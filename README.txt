@@ -55,12 +55,12 @@ Database Management: The database.py file handles CRUD operations for gestures a
 - TensorFlow/Keras for providing the machine learning framework 🍾
 - EfficientNet authors for their contribution to model efficiency 🥳
 - The SQLite team for their lightweight database management system used in storing gesture data 😇
+- Kubernetes for enabling scalable, automated container orchestration in production environments 🚀
 
 # **Future Improvements**
 - Add voice-command integration for enhanced usability.
 - Implement obstacle detection using ultrasonic sensors for safety.
 - Scale gesture recognition to support more complex commands.
-- Kubernetes for enabling scalable, automated container orchestration in production environments 🚀
 
 # **Contact Me 😃**
 - Darsh Garg

@@ -22,8 +22,8 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the application code into the container (app.py and requirements.txt)
-COPY . /workspace
+# Copy requirements.txt into the container
+COPY requirements.txt /workspace/
 
 # Install Python dependencies globally
 RUN pip3 install --upgrade pip setuptools wheel \

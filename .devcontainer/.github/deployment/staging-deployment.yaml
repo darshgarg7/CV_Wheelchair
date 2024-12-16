@@ -21,7 +21,7 @@ spec:
         - containerPort: 8000
         livenessProbe:
           httpGet:
-            path: /health  # Ensure the /health endpoint is exposed by your app
+            path: /health 
             port: 8000
           initialDelaySeconds: 5  # Delay before checking
           periodSeconds: 10  # Period between checks
@@ -51,18 +51,18 @@ spec:
         - containerPort: 8000
         livenessProbe:
           httpGet:
-            path: http://localhost:8000/health
+            path: /health
             port: 8000
           initialDelaySeconds: 5
           periodSeconds: 10
           failureThreshold: 3
         readinessProbe:
           httpGet:
-            path: http://localhost:8000/health  # Ensures the container is ready before traffic is sent
+            path: /health
             port: 8000
           initialDelaySeconds: 5
           periodSeconds: 10
-          failureThreshold: 3  # Ensures the container is ready before traffic is sent
+          failureThreshold: 3 
             port: 8000
           initialDelaySeconds: 5
           periodSeconds: 10

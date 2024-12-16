@@ -5,7 +5,7 @@ metadata:
   labels:
     app: cv-wheelchair
 spec:
-  replicas: 3  # Typically more replicas for production
+  replicas: 10
   selector:
     matchLabels:
       app: cv-wheelchair
@@ -21,14 +21,14 @@ spec:
         - containerPort: 8080
         livenessProbe:
           httpGet:
-            path: /health  # Ensure the /health endpoint is exposed
+            path: https://<random-api-domain>/health
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 10
           failureThreshold: 3
         readinessProbe:
           httpGet:
-            path: /health  # Ensures the container is ready before traffic is sent
+            path: https://<random-api-domain>/health  # Ensures the container is ready before traffic is sent
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 10

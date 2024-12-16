@@ -24,4 +24,4 @@ docutils==0.21
 botocore==1.34.50
 djangorestframework==3.13
 psycopg2==2.9
-
+flask==2.2.3

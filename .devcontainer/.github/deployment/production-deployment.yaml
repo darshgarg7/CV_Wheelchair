@@ -18,18 +18,18 @@ spec:
       - name: cv-wheelchair
         image: ghcr.io/${{ github.repository_owner }}/cv_wheelchair:1.0.0
         ports:
-        - containerPort: 8080
+        - containerPort: 8000
         livenessProbe:
           httpGet:
             path: https://<random-api-domain>/health
-            port: 8080
+            port: 8000
           initialDelaySeconds: 5
           periodSeconds: 10
           failureThreshold: 3
         readinessProbe:
           httpGet:
             path: https://<random-api-domain>/health  # Ensures the container is ready before traffic is sent
-            port: 8080
+            port: 8000
           initialDelaySeconds: 5
           periodSeconds: 10
           failureThreshold: 3

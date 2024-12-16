@@ -25,9 +25,6 @@ RUN apt-get update && apt-get install -y \
 # Copy the application code into the container (app.py and requirements.txt)
 COPY . /workspace
 
-# Copy requirements file into the container
-COPY requirements.txt /workspace/requirements.txt
-
 # Install Python dependencies globally
 RUN pip3 install --upgrade pip setuptools wheel \
     && pip3 install -r /workspace/requirements.txt \

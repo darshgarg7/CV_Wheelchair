@@ -36,7 +36,7 @@ Database Management: The database.py file handles CRUD operations for gestures a
 2. **Build the Docker Container**:
    docker build -t cv_wheelchair /path/to/.devcontainer  #add path to .devcontainer
 
-## **Usage**
+## **Usage (ensure you are in correct directory)**
 1. python3 gesture_model.py  #Train the Model
 2. tensorboard --logdir=./logs  #Monitor Training with TensorBoard
 3. python3 -m utils.deployment_utils  #Deploy the Model

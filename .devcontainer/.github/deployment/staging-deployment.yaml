@@ -5,7 +5,7 @@ metadata:
   labels:
     app: cv-wheelchair
 spec:
-  replicas: 2  # You can adjust the number of replicas based on your needs
+  replicas: 10
   selector:
     matchLabels:
       app: cv-wheelchair
@@ -16,19 +16,53 @@ spec:
     spec:
       containers:
       - name: cv-wheelchair
-        image: ghcr.io/${{ github.repository_owner }}/cv_wheelchair:latest  # Using the latest image tag
+        image: ghcr.io/${{ github.repository_owner }}/cv_wheelchair:1.2.1
         ports:
-        - containerPort: 8080  # Change this to match the exposed port of your app
+        - containerPort: 8080
         livenessProbe:
           httpGet:
             path: /health  # Ensure the /health endpoint is exposed by your app
             port: 8080
           initialDelaySeconds: 5  # Delay before checking
           periodSeconds: 10  # Period between checks
-          failureThreshold: 3  # Number of failures before considering the container unhealthy
+          failureThreshold: 2  # Number of failures before considering the container unhealthy
         readinessProbe:
           httpGet:
-            path: /health  # Ensures the container is ready before traffic is sent
+            path: apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cv-wheelchair-production
+  labels:
+    app: cv-wheelchair
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: cv-wheelchair
+  template:
+    metadata:
+      labels:
+        app: cv-wheelchair
+    spec:
+      containers:
+      - name: cv-wheelchair
+        image: ghcr.io/${{ github.repository_owner }}/cv_wheelchair:1.0.0
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: https://<random-api-domain>/health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: https://<random-api-domain>/health  # Ensures the container is ready before traffic is sent
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3  # Ensures the container is ready before traffic is sent
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 10

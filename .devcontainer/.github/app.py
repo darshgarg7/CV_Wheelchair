@@ -7,4 +7,4 @@ def health_check():
     return "Healthy", 200  # Responds with a 200 status if the service is healthy
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)  # Exposes your app on port 8000 (match with the forwarded port)
+    app.run(host='0.0.0.0', port=8000)

@@ -9,7 +9,7 @@
 		  "version": "3.12"
 		}
 	},
-	"postCreateCommand": "",
+	"postCreateCommand": "pip install flask",
 	"forwardPorts": [8000],
 	"remoteUser": "vscode",
 	"workspaceFolder": "/workspace"

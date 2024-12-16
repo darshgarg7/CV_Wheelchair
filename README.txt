@@ -20,7 +20,7 @@ It showcases advanced AI and software engineering practices in inclusive design 
   - **SQLite Database**: Uses a comprehensive schema to track gestures and actions in real-time.  
   - **Django Integration**: Structured for easy retrieval and updating of gesture data.
 - **Deployment & Operations**:  
-  - **CI/CD Pipeline**: Facilitates scalable, automated updates with Docker and Kubernetes for continuous integration and deployment.
+  - **CI/CD Pipeline**: Automates build, testing, and deployment with Docker and Kubernetes, ensuring rapid, reliable updates through staging and production environments with integrated health checks and model uploads.
   - **Logging & Error Handling**: Detailed logs for database operations and model management ensure reliability and transparency.
 
 # **Database and Gesture Management**

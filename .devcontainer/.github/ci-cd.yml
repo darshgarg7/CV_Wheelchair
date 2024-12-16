@@ -121,5 +121,6 @@ jobs:
     steps:
       - name: Rollback to previous stable version
         run: |
-          echo "Rolling back to previous stable version"  # Placeholder for rollback logic
-          kubectl set image deployment/cv-wheelchair cv-wheelchair=ghcr.io/${{ github.repository_owner }}/cv_wheelchair:mycontainerimage:1.0  # Rollback to a previous stable image tag
+          echo "Rolling back to previous stable version"
+          kubectl set image deployment/cv-wheelchair-production cv-wheelchair=ghcr.io/${{ github.repository_owner }}/cv_wheelchair:1.0.0
+

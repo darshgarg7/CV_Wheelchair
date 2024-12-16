@@ -15,10 +15,10 @@ RUN apt-get update && apt-get install -y \
     libopencv-dev \
     libpng-dev \
     libtiff-dev \
-    libjasper-dev \
     libdcmtk-dev \
     pkg-config \
     libatlas-base-dev \
+    libturbojpeg-dev \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 

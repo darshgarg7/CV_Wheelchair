@@ -1,7 +1,6 @@
 # Computer Vision Wheelchair with Gesture Augmentation
 
-This repository implements a state-of-the-art gesture-controlled wheelchair system, combining EfficientNetB7 as a backbone for image classification, GAN-based synthetic data augmentation to handle class imbalances, and an IoT-powered control mechanism.
-The system integrates CI/CD pipelines for continuous deployment and is designed to showcase cutting-edge AI and software engineering practices in inclusive design and accessibility; there is a SQLite Database for storing gestures and logs with Django Integration.
+This repository implements a gesture-controlled wheelchair system powered by EfficientNetB7 for image classification, GAN-based synthetic data augmentation, and an IoT-driven control mechanism. The project features a scalable CI/CD pipeline with Docker and Kubernetes integration for automated deployment, while using SQLite and Django for data storage and backend scalability. It showcases advanced AI and software engineering practices in inclusive design for accessibility.
 
 ## **Key Features**
 - **Gesture Recognition and Wheelchair Control**:  
@@ -19,7 +18,7 @@ The system integrates CI/CD pipelines for continuous deployment and is designed 
   - **SQLite Database**: Uses a comprehensive schema to track gestures and actions in real-time.  
   - **Django Integration**: Structured for easy retrieval and updating of gesture data.
 - **Deployment & Operations**:  
-  - **CI/CD Pipeline**: Ensures scalable, rapid updates with Docker for continuous deployment.  
+  - **CI/CD Pipeline**: Facilitates scalable, automated updates with Docker and Kubernetes for continuous integration and deployment.
   - **Logging & Error Handling**: Detailed logs for database operations and model management ensure reliability and transparency.
 
 # **Database and Gesture Management**

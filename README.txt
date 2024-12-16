@@ -41,8 +41,8 @@ Database Management: The database.py file handles CRUD operations for gestures a
 1. python3 gesture_model.py  #Train the Model
      - tensorboard --logdir=./logs        #Monitor Training with TensorBoard
      - python3 -m utils.deployment_utils  #Deploy the Model
-2. python3 controller.py  #Run Wheelchair Controller
-3. python3 app.py #Run Server
+2. python3 controller.py                  #Run Wheelchair Controller
+3. python3 app.py                         #Run Server
      - curl http://localhost:8000/health  #Perform Health Check
 
 # **Contributing**

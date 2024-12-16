@@ -22,6 +22,9 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy the application code into the container (app.py and requirements.txt)
+COPY . /workspace
+
 # Copy requirements file into the container
 COPY requirements.txt /workspace/requirements.txt
 
@@ -29,6 +32,9 @@ COPY requirements.txt /workspace/requirements.txt
 RUN pip3 install --upgrade pip setuptools wheel \
     && pip3 install -r /workspace/requirements.txt \
     && rm -rf /root/.cache/pip  # Clean up temporary files to reduce image size
+
+# Expose port 8000 for Flask health check
+EXPOSE 8000
 
 # Set default command
 CMD ["bash"]

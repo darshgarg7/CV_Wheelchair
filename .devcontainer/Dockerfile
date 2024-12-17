@@ -26,9 +26,8 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt /workspace/
 
 # Install Python dependencies globally
-RUN pip3 install --upgrade pip setuptools wheel \
-    && pip3 install -r /workspace/requirements.txt \
-    && rm -rf /root/.cache/pip  # Clean up temporary files to reduce image size
+RUN pip3 install -r /workspace/requirements.txt \
+    && rm -rf /workspace/.cache/pip  # Clean up temporary files to reduce image size
 
 # Expose port 8000 for Flask health check
 EXPOSE 8000

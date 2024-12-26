@@ -41,7 +41,7 @@ def build_conditional_gan_generator() -> Model:
     """
     noise_input = layers.Input(shape=(100,))
     label_input = layers.Input(shape=(1,))
-    label_embedding = Embedding(3, 100)(label_input)  # Assuming 3 classes (gestures)
+    label_embedding = Embedding(4, 100)(label_input)  # Assuming 4 classes (gestures)
     merged_input = Concatenate()([noise_input, label_embedding])
     
     x = Dense(128, activation='relu')(merged_input)

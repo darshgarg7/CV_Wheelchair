@@ -46,7 +46,7 @@ The project aims to enhance accessibility and mobility for individuals with phys
 ### Prerequisites
 - Docker Desktop (ensure it is running)
 - Python 3.8+ installed
-- TensorFlow, OpenCV, Flask, and other dependencies (listed in requirements.txt)
+- TensorFlow, OpenCV, Flask, and other dependencies (listed in requirements.txt) [optional - running in docker]
 
 ### Steps to Install:
 1. **Clone the Repository:**

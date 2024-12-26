@@ -2,25 +2,16 @@ import logging
 import numpy as np
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, TensorBoard
 from keras_tuner import Hyperband
-from utils.data_utils import augment_data_with_gan
-from utils.model_utils import build_model, monitor_model
-from utils.deployment_utils import save_model_for_serving
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import precision_recall_fscore_support
+from models.data_utils import augment_data_with_gan
+from models.model_utils import build_model, monitor_model
+from devcontainer.deployment_utils import save_model_for_serving
 
-# Initialize logging for easy debugging and tracking of pipeline progress
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def hyperparameter_tuning(X_train, y_train, X_val, y_val):
-    """
-    Conduct hyperparameter tuning using Keras Tuner's Hyperband.
-    Optimizes hyperparameters for model architecture.
-    
-    :param X_train: Training image data.
-    :param y_train: Labels for training data.
-    :param X_val: Validation image data.
-    :param y_val: Validation labels.
-    :return: Best hyperparameters found during tuning.
-    """
+def hyperparameter_tuning(X_train: np.ndarray, y_train: np.ndarray, X_val: np.ndarray, y_val: np.ndarray) -> dict:
     logger.info("Initializing hyperparameter tuning...")
     tuner = Hyperband(
         build_model, 
@@ -35,38 +26,39 @@ def hyperparameter_tuning(X_train, y_train, X_val, y_val):
     logger.info(f"Best hyperparameters: {best_hyperparams.values}")
     return best_hyperparams
 
+def evaluate_model(model, X_val: np.ndarray, y_val: np.ndarray):
+    loss, acc = model.evaluate(X_val, y_val, verbose=1)
+    logger.info(f"Validation Loss: {loss:.4f}, Accuracy: {acc:.4f}")
+    
+    y_pred = model.predict(X_val)
+    y_pred_classes = np.argmax(y_pred, axis=1)
+    
+    precision, recall, f1, _ = precision_recall_fscore_support(y_val, y_pred_classes, average='macro')
+    logger.info(f"Precision: {precision:.4f}, Recall: {recall:.4f}, F1-score: {f1:.4f}")
+
 def train_model():
-    """
-    Orchestrates the full model training pipeline.
-    Involves data augmentation, hyperparameter tuning, training, and deployment.
-    """
     try:
-        # Data generation and augmentation
         logger.info("Generating synthetic data...")
         num_samples = 1000
         images = np.random.rand(num_samples, 224, 224, 3) * 255
-        gestures = np.random.randint(0, 3, size=num_samples)
+        gestures = np.random.randint(0, 4, size=num_samples)
 
         logger.info("Augmenting data using GAN...")
-        images_augmented, gestures_augmented = augment_data_with_gan(images, gestures)
+        images_augmented, gestures_augmented = augment_data_with_gan(images, gestures, real_to_synthetic_ratio=0.5)
 
         if images_augmented.shape[0] != gestures_augmented.shape[0]:
             raise ValueError("Data mismatch between images and labels.")
 
-        # Train/Validation Split
-        logger.info("Splitting data into training and validation sets...")
-        split_index = int(0.8 * len(images_augmented))
-        X_train, X_val = images_augmented[:split_index], images_augmented[split_index:]
-        y_train, y_val = gestures_augmented[:split_index], gestures_augmented[split_index:]
+        logger.info("Shuffling and splitting data into training and validation sets...")
+        X_train, X_val, y_train, y_val = train_test_split(
+            images_augmented, gestures_augmented, test_size=0.2, random_state=42
+        )
 
-        # Hyperparameter tuning
         best_hyperparams = hyperparameter_tuning(X_train, y_train, X_val, y_val)
         
-        # Build model with best hyperparameters
         logger.info("Building model with optimized parameters...")
         model = build_model(hyperparams=best_hyperparams)
 
-        # Define callbacks for training
         logger.info("Configuring callbacks...")
         callbacks = [
             ModelCheckpoint('best_model.h5', save_best_only=True, monitor='val_accuracy', verbose=1),
@@ -74,15 +66,18 @@ def train_model():
             TensorBoard(log_dir='./logs', update_freq='epoch')
         ]
 
-        # Train model
         logger.info("Starting model training...")
-        model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=50, callbacks=callbacks)
+        history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=50, callbacks=callbacks)
 
-        # Save trained model
+        logger.info("Training complete. Logging performance metrics...")
+        for epoch in range(len(history.history['loss'])):
+            logger.info(f"Epoch {epoch+1}: Loss = {history.history['loss'][epoch]}, Accuracy = {history.history['accuracy'][epoch]}")
+
+        evaluate_model(model, X_val, y_val)
+        
         logger.info("Saving the trained model for deployment...")
         save_model_for_serving(model, 'gesture_recognition_model')
 
-        # Monitor model performance
         logger.info("Monitoring model on validation data...")
         monitor_model(model, X_val, y_val)
 

@@ -2,23 +2,32 @@ import cv2
 import numpy as np
 from tensorflow.keras.models import load_model
 from typing import Dict, Optional
+import logging
 
 class GestureRecognition:
     """
     Class for gesture recognition using a pre-trained machine learning model.
     """
 
-    def __init__(self, model_path: str):
+    def __init__(self, model_path: str, confidence_threshold: float = 0.6):
         """
         Initializes the GestureRecognition class with the specified model.
+        
+        :param model_path: Path to the pre-trained model.
+        :param confidence_threshold: Threshold for confidence in predictions (default: 0.6).
         """
         self.model = self._load_model(model_path)
         self.class_names = self._load_class_names()
+        self.confidence_threshold = confidence_threshold
 
     @staticmethod
     def _load_model(model_path: str):
         """
         Loads the gesture recognition model.
+        
+        :param model_path: Path to the model file.
+        :return: Loaded model.
+        :raises RuntimeError: If model loading fails.
         """
         try:
             return load_model(model_path)
@@ -29,6 +38,8 @@ class GestureRecognition:
     def _load_class_names() -> Dict[int, str]:
         """
         Loads class names for gesture recognition.
+        
+        :return: Dictionary of class names.
         """
         return {
             0: "Stop", 
@@ -36,10 +47,13 @@ class GestureRecognition:
             2: "Turn Left", 
             3: "Turn Right", 
         }
-    
+
     def predict_gesture(self, frame: np.ndarray) -> Optional[str]:
         """
         Predicts the gesture from the provided video frame.
+        
+        :param frame: Input frame from video or image.
+        :return: Predicted gesture as a string if confidence is above threshold, else None.
         """
         try:
             processed_frame = GestureRecognition._preprocess_frame(frame)
@@ -63,6 +77,9 @@ class GestureRecognition:
     def _preprocess_frame(frame: np.ndarray) -> np.ndarray:
         """
         Preprocesses the input frame for the model.
+        
+        :param frame: Input frame from video or image.
+        :return: Preprocessed frame ready for model input.
         """
         try:
             resized_frame = cv2.resize(frame, (64, 64))  # Resize to match training dimensions

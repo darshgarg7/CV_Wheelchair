@@ -9,32 +9,30 @@ from botocore.exceptions import NoCredentialsError, ClientError
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger()
 
-def save_model_for_serving(model, model_name, version=None, storage_path='models', s3_bucket=None):
+def save_model_for_serving(model, model_name, version=None, s3_bucket=None):
     """
     Saves the trained model in a format suitable for serving in production environments.
     Designed for CI/CD workflows with model versioning and scalable storage options.
     """
+    # Default version based on current time if not provided
     version = version or datetime.now().strftime('%Y%m%d_%H%M%S')
-    model_save_path = os.path.join(storage_path, model_name, version)
+    model_save_path = os.path.join('models', model_name, version)
     
     try:
+        # Ensure the model save directory exists
         if not os.path.exists(model_save_path):
             os.makedirs(model_save_path)
         
-        model.save(model_save_path, save_format='tf')  # Save the model in TensorFlow's format
+        # Save the model in TensorFlow's SavedModel format
+        model.save(model_save_path, save_format='tf')
         logger.info(f"Model {model_name} version {version} saved successfully at {model_save_path}")
 
+        # If an S3 bucket is provided, upload the model
         if s3_bucket:
             upload_model_to_s3(model_save_path, model_name, version, s3_bucket)
         
     except Exception as e:
         logger.error(f"Error saving model {model_name} version {version}: {e}")
-        raise
-
-    try:
-        logger.info(f"Deployment of model {model_name} version {version} tracked successfully.")
-    except Exception as e:
-        logger.error(f"Error logging deployment: {e}")
         raise
 
 def upload_model_to_s3(local_model_path, model_name, version, s3_bucket):
@@ -44,9 +42,9 @@ def upload_model_to_s3(local_model_path, model_name, version, s3_bucket):
     try:
         s3_client = boto3.client('s3')
         s3_model_path = f'{model_name}/{version}/'
-        
+
         # Walk through the local model path and upload files to S3
-        for root, files in os.walk(local_model_path):
+        for root, dirs, files in os.walk(local_model_path):
             for file in files:
                 local_file_path = os.path.join(root, file)
                 relative_path = os.path.relpath(local_file_path, local_model_path)

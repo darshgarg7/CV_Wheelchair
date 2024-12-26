@@ -1,18 +1,17 @@
-import numpy as np
 from tensorflow.keras import layers, models
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.applications import MobileNet, EfficientNetLite
 
-def build_model(hyperparams: dict = None) -> models.Model:
-    """
-    Build a gesture recognition model using MobileNet or EfficientNet-Lite as the backbone.
-    The choice of base model is fixed to MobileNet, but you can easily swap it with EfficientNet-Lite by changing the model initialization.
 
-    :param hyperparams: Dictionary of hyperparameters to customize model behavior (e.g., learning rate, dropout, dense units).
-    :return: A compiled Keras model instance.
+def build_model(hyperparams: dict = None, backbone: str = 'MobileNet') -> models.Model:
+    """
+    Build a gesture recognition model with a customizable backbone.
+
+    :param hyperparams: Dictionary with required keys ['trainable', 'dropout', 'dense_units', 'lr'].
+    :param backbone: 'MobileNet' or 'EfficientNetLite' for the base model.
+    :return: A compiled Keras model.
     """
     
-    # Default hyperparameters if none are provided
     if hyperparams is None:
         hyperparams = {
             'trainable': False,
@@ -21,23 +20,26 @@ def build_model(hyperparams: dict = None) -> models.Model:
             'lr': 1e-4
         }
 
-    # Choose base model: MobileNet or EfficientNet-Lite
-    base_model = MobileNet(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
-    base_model.trainable = hyperparams.get('trainable', False)
+    if backbone == 'MobileNet':
+        base_model = MobileNet(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+    elif backbone == 'EfficientNetLite':
+        base_model = EfficientNetLite(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+    else:
+        raise ValueError("Unsupported backbone. Choose MobileNet or EfficientNetLite.")
 
-    # Build model architecture
+    base_model.trainable = hyperparams['trainable']
+    
     model = models.Sequential([
         base_model,
-        layers.GlobalAveragePooling2D(),  # Reduce dimensionality from feature maps
-        layers.Dropout(hyperparams.get('dropout', 0.5)),  # Regularization to prevent overfitting
-        layers.Dense(hyperparams.get('dense_units', 512), activation='swish'),  # Fully connected layer
-        layers.Dropout(hyperparams.get('dropout', 0.5)),  # Another dropout layer
-        layers.Dense(3, activation='softmax')  # Output layer with 3 units for 3 gesture classes
+        layers.GlobalAveragePooling2D(),
+        layers.Dropout(hyperparams['dropout']),
+        layers.Dense(hyperparams['dense_units'], activation='swish'),
+        layers.Dropout(hyperparams['dropout']),
+        layers.Dense(4, activation='softmax')
     ])
     
-    # Compile the model with Adam optimizer and sparse categorical crossentropy loss
     model.compile(
-        optimizer=Adam(learning_rate=hyperparams.get('lr', 1e-4)),
+        optimizer=Adam(learning_rate=hyperparams['lr']),
         loss='sparse_categorical_crossentropy',
         metrics=['accuracy']
     )

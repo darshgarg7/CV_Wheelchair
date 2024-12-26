@@ -1,7 +1,8 @@
 # CV_Wheelchair: Gesture-Controlled Wheelchair with AI and Computer Vision
 
 ## Overview
-CV_Wheelchair leverages artificial intelligence and computer vision to provide intuitive, hands-free control of a wheelchair. The system uses a real-time gesture recognition model powered by TensorFlow to interpret hand gestures via a camera and control the wheelchair's movement accordingly. The project aims to enhance accessibility and mobility for individuals with physical disabilities, making it a cutting-edge solution in assistive technology.
+CV_Wheelchair leverages artificial intelligence and computer vision to provide intuitive, hands-free control of a wheelchair. The system uses a real-time gesture recognition model powered by TensorFlow to interpret hand gestures via a camera and control the wheelchair's movement accordingly.
+The project aims to enhance accessibility and mobility for individuals with physical disabilities, making it a cutting-edge solution in assistive technology.
 
 ## Key Features
 - **Gesture Recognition**: Controls wheelchair movement via 4 simple gestures:

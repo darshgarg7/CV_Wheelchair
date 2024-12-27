@@ -1,7 +1,7 @@
 from tensorflow.keras import layers, models
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.applications import MobileNet, EfficientNetLite
-
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
 
 def build_model(hyperparams: dict = None, backbone: str = 'MobileNet') -> models.Model:
     """
@@ -45,3 +45,18 @@ def build_model(hyperparams: dict = None, backbone: str = 'MobileNet') -> models
     )
 
     return model
+
+
+def monitor_model(monitor: str = 'val_loss') -> list:
+    """
+    Creates and returns the callbacks for monitoring the model during training.
+
+    :param monitor: The metric to monitor during training, either 'val_loss' or 'val_accuracy'.
+    :return: List of Keras callbacks for monitoring the model.
+    """
+    # Create the monitoring callbacks
+    checkpoint = ModelCheckpoint('best_model.h5', monitor=monitor, save_best_only=True, mode='min', verbose=1)
+    early_stopping = EarlyStopping(monitor=monitor, patience=5, mode='min', verbose=1)
+
+    # Return the list of callbacks
+    return [checkpoint, early_stopping]

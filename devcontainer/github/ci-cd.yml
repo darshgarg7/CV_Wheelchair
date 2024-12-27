@@ -81,10 +81,17 @@ jobs:
       - name: Save and upload model to S3
         run: |
           python -c "
-          import tensorflow as tf; 
-          from deployment_utils import save_model_for_serving; 
-          model = tf.keras.models.Sequential([tf.keras.layers.Dense(1, input_dim=1)])  # Example model; replace with actual model
-          save_model_for_serving(model, 'cv_wheelchair', s3_bucket='${{ secrets.S3_BUCKET_NAME }}')"  # Uploads model for use in production
+          import tensorflow as tf
+          from devcontainer.deployment_utils import save_model_for_serving
+          from models.gesture_model import train_model
+          
+          # Train the model and retrieve the trained instance
+          print('Training the model...')
+          model = train_model()
+
+          # Upload the trained model to S3
+          print('Saving and uploading the model to S3...')
+          save_model_for_serving(model, 'gesture_recognition_model', s3_bucket='${{ secrets.S3_BUCKET_NAME }}')
 
       - name: Promote to production (auto or manual)
         if: success()  # Promotes deployment only if the staging deployment is successful

@@ -26,9 +26,13 @@ spec:
           initialDelaySeconds: 5  # Delay before checking
           periodSeconds: 10  # Period between checks
           failureThreshold: 2  # Number of failures before considering the container unhealthy
-        readinessProbe:
-          httpGet:
-            path: apiVersion: apps/v1
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
 kind: Deployment
 metadata:
   name: cv-wheelchair-production

@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import logging
+from models.gesture_model import train_model
 
 logger = logging.getLogger()
 
@@ -72,70 +73,7 @@ def monitor_model(monitor: str = 'val_loss', patience: int = 5, restore_best_wei
     # Return the list of callbacks
     return [checkpoint, early_stopping, tensorboard]
 
-def build_model(hyperparams: dict = None, backbone: str = 'MobileNet') -> models.Model:
-    """
-    Build a gesture recognition model with a customizable backbone.
-
-    :param hyperparams: Dictionary with required keys ['trainable', 'dropout', 'dense_units', 'lr'].
-    :param backbone: 'MobileNet' or 'EfficientNetLite' for the base model.
-    :return: A compiled Keras model.
-    """
-    
-    if hyperparams is None:
-        hyperparams = {
-            'trainable': False,
-            'dropout': 0.5,
-            'dense_units': 512,
-            'lr': 1e-4
-        }
-
-    if backbone == 'MobileNet':
-        base_model = MobileNet(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
-    elif backbone == 'EfficientNetLite':
-        base_model = EfficientNetLite(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
-    else:
-        raise ValueError("Unsupported backbone. Choose MobileNet or EfficientNetLite.")
-
-    base_model.trainable = hyperparams['trainable']
-    
-    model = models.Sequential([
-        base_model,
-        layers.GlobalAveragePooling2D(),
-        layers.Dropout(hyperparams['dropout']),
-        layers.Dense(hyperparams['dense_units'], activation='swish'),
-        layers.Dropout(hyperparams['dropout']),
-        layers.Dense(4, activation='softmax')
-    ])
-    
-    model.compile(
-        optimizer=Adam(learning_rate=hyperparams['lr']),
-        loss='sparse_categorical_crossentropy',
-        metrics=['accuracy']
-    )
-
-    return model
-
-def monitor_model(monitor: str = 'val_loss', patience: int = 5, restore_best_weights: bool = True) -> list:
-    """
-    Creates and returns the callbacks for monitoring the model during training.
-
-    :param monitor: The metric to monitor during training, either 'val_loss', 'val_accuracy', etc.
-    :param patience: Number of epochs with no improvement after which training will be stopped.
-    :param restore_best_weights: Whether to restore model weights from the epoch with the best value of the monitored metric.
-    :return: List of Keras callbacks for monitoring the model.
-    """
-    logger.info(f"Creating callbacks to monitor {monitor}...")
-    
-    checkpoint = ModelCheckpoint('best_model.h5', save_best_only=True, monitor=monitor, verbose=1, mode='max' if 'accuracy' in monitor else 'min')
-    early_stopping = EarlyStopping(monitor=monitor, patience=patience, restore_best_weights=restore_best_weights, verbose=1, mode='max' if 'accuracy' in monitor else 'min')
-    tensorboard = TensorBoard(log_dir='./logs', update_freq='epoch')
-
-    logger.info(f"Callbacks configured for monitoring {monitor}.")
-    
-    # Return the list of callbacks
-    return [checkpoint, early_stopping, tensorboard]
-
-def plot_grad_cam(model, image, last_conv_layer_name, label_index=None):
+def plot_grad_cam(model, image, conv_dw_13_relu, label_index=None):
     """
     Plots the Grad-CAM heatmap for a specific model prediction.
 
@@ -190,11 +128,9 @@ def plot_grad_cam(model, image, last_conv_layer_name, label_index=None):
     plt.title(f'Grad-CAM for Class {label_index}')
     plt.show()
 
-
 if __name__ == "__main__":
-model = build_model()
-image = np.random.rand(224, 224, 3)
+    model = train_model()
+    image = np.random.rand(224, 224, 3)
 
-# Call Grad-CAM function
-plot_grad_cam(model, image, last_conv_layer_name='conv_pw_13_relu', label_index=1)  # Adjust layer name and index
-
+    # Call Grad-CAM function
+    plot_grad_cam(model, image, last_conv_layer_name='conv_pw_13_relu', label_index=1)  # Adjust layer name and index as needed

@@ -65,7 +65,7 @@ graph TD
     class DevContainer,Dockerfile,Kubernetes,AWSS3,FlaskApp devops
 ```
 
-### Components:
+### Components (simple):
 - **Gesture Recognition Model**: A Convolutional Neural Network (CNN) processes camera input and classifies gestures. The model is trained to recognize 4 specific hand gestures.
 - **Wheelchair Controller**: Interprets the output of the gesture recognition model and sends movement commands to the wheelchair's motor control system.
 - **Web Server (Flask)**: A Flask web server exposes an API for health checks, system control, and status monitoring.
@@ -125,7 +125,7 @@ Run the Flask web server for system health and control:
 python3 app.py
 ```
 Health Check (optional):
-Test if the system is running by checking the health endpoint:
+Test if the system is running by checking endpoints (ex: the health endpoint):
 ```bash
 curl http://localhost:8000/health
 ```
@@ -138,18 +138,46 @@ python3 -m unittest discover tests/
 
 ## Model Architecture
 
-The gesture recognition model is based on a **Convolutional Neural Network (CNN)**, optimized for gesture classification tasks.
+The gesture recognition model is based on **MobileNet and EfficientNetLite**, which are lightweight, pre-trained CNNs optimized for efficiency and performance on resource-constrained devices. These models are fine-tuned for the specific task of gesture classification.
 
-### CNN Layers:
-- **Conv2D**: Extracts spatial features from images.
-- **MaxPooling2D**: Reduces the dimensionality and retains important features.
-- **Flatten & Dense**: Transforms the extracted features into a final gesture prediction.
+# Fine Tuning
 
-### Training Details:
-- **Training Dataset**: A diverse dataset of hand gesture images labeled with corresponding gestures.
-- **Hyperparameters**: Optimized using grid search to find the best accuracy and performance trade-off.
-- **Optimizer**: Adam optimizer for faster convergence and better results.
-- **Loss Function**: Categorical crossentropy for multi-class classification.
+- **Custom Output Layer**:  
+  The final classification layer of the pre-trained model is replaced with a new dense layer tailored to the number of gesture classes (e.g., "Stop", "Go", "Turn Left", "Turn Right"). This ensures the model outputs predictions specific to the defined gestures.
+
+- **MobileNet**:  
+  Utilizes depthwise separable convolutions, which significantly reduce computational complexity while maintaining high accuracy. This makes it ideal for real-time applications like gesture recognition on resource-constrained devices.
+
+- **EfficientNetLite**:  
+  A lightweight variant of EfficientNet, optimized for TensorFlow Lite. It systematically scales model width, depth, and resolution to balance accuracy and performance, making it suitable for edge devices like Raspberry Pi.
+
+# Training Details
+
+- **Training Dataset**:  
+  A diverse dataset of hand gesture images labeled with corresponding gestures. To address class imbalances and improve robustness, synthetic data was generated using a **Conditional GAN**. This augmentation step enhanced the model's ability to generalize across different scenarios.
+
+- **Hyperparameters**:  
+  Optimized using grid search to find the best trade-off between accuracy and performance. Parameters such as learning rate, batch size, and regularization were fine-tuned to maximize model efficiency.
+
+- **Optimizer**:  
+  The **Adam optimizer** was used for faster convergence and better results. Its adaptive learning rate capabilities made it well-suited for training the gesture recognition model.
+
+- **Loss Function**:  
+  **Categorical crossentropy** was employed for multi-class classification, ensuring the model effectively learns to distinguish between the different gesture classes.
+
+# Additional Notes
+
+- **Data Augmentation**:  
+  Beyond Conditional GAN, traditional augmentation techniques like rotation, scaling, and flipping were applied to further diversify the training dataset.
+
+- **Early Stopping**:  
+  Implemented to prevent overfitting by halting training when validation performance plateaus.
+
+- **Model Evaluation**:  
+  Precision, recall, and F1-score metrics were used to evaluate the model's performance, ensuring it is both accurate and reliable in real-world scenarios.
+
+- **Deployment Optimization**:  
+  The trained model was converted to **TensorFlow Lite** format for efficient deployment on edge devices, ensuring low latency and high throughput during inference.
 
 ### Performance Metrics:
 - **Accuracy**: Achieved **90%** accuracy on the validation dataset with real-time performance.

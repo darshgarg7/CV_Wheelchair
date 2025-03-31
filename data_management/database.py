@@ -3,23 +3,10 @@ import json
 import logging
 from contextlib import closing
 
-# Initialize logging for detailed output and tracking
+# Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-def apply_pragma_settings(conn):
-    """
-    Apply various PRAGMA settings for SQLite optimization.
-    """
-    PRAGMA_SETTINGS = {
-        'foreign_keys': 'ON',  # Ensure foreign key checks are enabled
-        'journal_mode': 'WAL',  # Use Write-Ahead Logging for better concurrency
-        'synchronous': 'NORMAL',  # Set synchronous mode to NORMAL for better performance
-        'cache_size': 10000,  # Adjust cache size for performance tuning
-    }
-
-    for key, value in PRAGMA_SETTINGS.items():
-        conn.execute(f"PRAGMA {key} = {value};")
 
 class DatabaseManager:
     """
@@ -41,12 +28,11 @@ class DatabaseManager:
         """
         try:
             with sqlite3.connect(self.db_name) as conn, closing(conn.cursor()) as cursor:
-                apply_pragma_settings(conn)  # Apply PRAGMA settings on connection
                 queries = [
                     '''
                     CREATE TABLE IF NOT EXISTS gestures (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        gesture_name TEXT UNIQUE NOT NULL,
+                        name TEXT NOT NULL UNIQUE,
                         command TEXT NOT NULL,
                         coordinates JSON NOT NULL
                     )
@@ -59,7 +45,7 @@ class DatabaseManager:
                         FOREIGN KEY (gesture_id) REFERENCES gestures(id) ON DELETE CASCADE
                     )
                     ''',
-                    'CREATE INDEX IF NOT EXISTS idx_gesture_name ON gestures(gesture_name)',
+                    'CREATE INDEX IF NOT EXISTS idx_gesture_name ON gestures(name)',
                     'CREATE INDEX IF NOT EXISTS idx_timestamp ON logs(timestamp)'
                 ]
                 for query in queries:
@@ -70,37 +56,44 @@ class DatabaseManager:
             logger.error(f"Error during database setup: {e}")
             raise
 
-    def add_gesture(self, gesture_name, command, coordinates):
+    def save_gesture(self, gesture_name: str, command: str, coordinates: dict):
         """
-        Inserts a new gesture into the database, ensuring valid coordinates.
+        Saves a recognized gesture into the database.
+        If the gesture already exists, updates its command and coordinates.
+        Logs the gesture usage in the logs table.
+        Args:
+            gesture_name (str): Name of the gesture.
+            command (str): Command associated with the gesture.
+            coordinates (dict): Gesture coordinates stored as a dictionary.
         """
-        if not isinstance(coordinates, list):
-            logger.error("Coordinates must be a list.")
-            raise ValueError("Coordinates must be a list.")
         try:
             with sqlite3.connect(self.db_name) as conn, closing(conn.cursor()) as cursor:
-                apply_pragma_settings(conn)  # Apply PRAGMA settings on connection
-                cursor.execute(
-                    '''
-                    INSERT INTO gestures (gesture_name, command, coordinates) 
-                    VALUES (?, ?, ?)
-                    ''', (gesture_name, command, json.dumps(coordinates))
-                )
-                conn.commit()
-                logger.info(f"Gesture '{gesture_name}' added successfully.")
-        except sqlite3.IntegrityError:
-            logger.warning(f"Gesture '{gesture_name}' already exists.")
-        except sqlite3.Error as e:
-            logger.error(f"Error adding gesture: {e}")
-            raise
+                # Check if the gesture already exists
+                cursor.execute('SELECT id FROM gestures WHERE name = ?', (gesture_name,))
+                result = cursor.fetchone()
 
-    def add_log(self, gesture_id):
-        """
-        Records the usage of a gesture in the logs table.
-        """
-        try:
-            with sqlite3.connect(self.db_name) as conn, closing(conn.cursor()) as cursor:
-                apply_pragma_settings(conn)  # Apply PRAGMA settings on connection
+                if result:
+                    gesture_id = result[0]
+                    logger.info(f"Gesture '{gesture_name}' already exists in the database. Updating...")
+                    cursor.execute(
+                        '''
+                        UPDATE gestures 
+                        SET command = ?, coordinates = ? 
+                        WHERE id = ?
+                        ''', (command, json.dumps(coordinates), gesture_id)
+                    )
+                else:
+                    # Insert the new gesture
+                    cursor.execute(
+                        '''
+                        INSERT INTO gestures (name, command, coordinates) 
+                        VALUES (?, ?, ?)
+                        ''', (gesture_name, command, json.dumps(coordinates))
+                    )
+                    gesture_id = cursor.lastrowid
+                    logger.info(f"Gesture '{gesture_name}' added successfully.")
+
+                # Log the gesture usage
                 cursor.execute(
                     '''
                     INSERT INTO logs (gesture_id) VALUES (?)
@@ -108,33 +101,39 @@ class DatabaseManager:
                 )
                 conn.commit()
                 logger.info(f"Log entry added for gesture ID {gesture_id}.")
+        except sqlite3.IntegrityError:
+            logger.warning(f"Gesture '{gesture_name}' already exists.")
         except sqlite3.Error as e:
-            logger.error(f"Error adding log entry: {e}")
+            logger.error(f"Error saving gesture: {e}")
             raise
 
     def fetch_all_gestures(self):
         """
-        Retrieves all gestures from the database.
+        Fetches all gestures from the database.
+        Returns:
+            list: A list of tuples containing gesture data (id, name, command, coordinates).
         """
         try:
             with sqlite3.connect(self.db_name) as conn, closing(conn.cursor()) as cursor:
-                apply_pragma_settings(conn)  # Apply PRAGMA settings on connection
                 cursor.execute('SELECT * FROM gestures')
                 results = cursor.fetchall()
-                logger.info(f"Fetched {len(results)} gestures.")
+                logger.info(f"Fetched {len(results)} gestures from the database.")
                 return results
         except sqlite3.Error as e:
             logger.error(f"Error fetching gestures: {e}")
             return []
 
-    def fetch_gesture_by_name(self, gesture_name):
+    def fetch_gesture_by_name(self, gesture_name: str):
         """
-        Retrieves a gesture by its name.
+        Fetches a gesture by its name.
+        Args:
+            gesture_name (str): Name of the gesture to fetch.
+        Returns:
+            tuple: A tuple containing gesture data (id, name, command, coordinates), or None if not found.
         """
         try:
             with sqlite3.connect(self.db_name) as conn, closing(conn.cursor()) as cursor:
-                apply_pragma_settings(conn)  # Apply PRAGMA settings on connection
-                cursor.execute('SELECT * FROM gestures WHERE gesture_name = ?', (gesture_name,))
+                cursor.execute('SELECT * FROM gestures WHERE name = ?', (gesture_name,))
                 result = cursor.fetchone()
                 if result:
                     logger.info(f"Gesture '{gesture_name}' retrieved successfully.")
@@ -144,3 +143,71 @@ class DatabaseManager:
         except sqlite3.Error as e:
             logger.error(f"Error fetching gesture by name: {e}")
             return None
+
+    def update_gesture(self, gesture_name: str, new_command: str, new_coordinates: dict):
+        """
+        Updates the command and coordinates of an existing gesture.
+        Args:
+            gesture_name (str): Name of the gesture to update.
+            new_command (str): New command for the gesture.
+            new_coordinates (dict): New coordinates for the gesture.
+        Returns:
+            bool: True if the update was successful, False otherwise.
+        """
+        try:
+            with sqlite3.connect(self.db_name) as conn, closing(conn.cursor()) as cursor:
+                cursor.execute(
+                    '''
+                    UPDATE gestures 
+                    SET command = ?, coordinates = ? 
+                    WHERE name = ?
+                    ''', (new_command, json.dumps(new_coordinates), gesture_name)
+                )
+                if cursor.rowcount > 0:
+                    conn.commit()
+                    logger.info(f"Gesture '{gesture_name}' updated successfully.")
+                    return True
+                else:
+                    logger.warning(f"Gesture '{gesture_name}' not found for update.")
+                    return False
+        except sqlite3.Error as e:
+            logger.error(f"Error updating gesture: {e}")
+            return False
+
+    def delete_gesture(self, gesture_name: str):
+        """
+        Deletes a gesture from the database.
+        Args:
+            gesture_name (str): Name of the gesture to delete.
+        Returns:
+            bool: True if the deletion was successful, False otherwise.
+        """
+        try:
+            with sqlite3.connect(self.db_name) as conn, closing(conn.cursor()) as cursor:
+                cursor.execute('DELETE FROM gestures WHERE name = ?', (gesture_name,))
+                if cursor.rowcount > 0:
+                    conn.commit()
+                    logger.info(f"Gesture '{gesture_name}' deleted successfully.")
+                    return True
+                else:
+                    logger.warning(f"Gesture '{gesture_name}' not found for deletion.")
+                    return False
+        except sqlite3.Error as e:
+            logger.error(f"Error deleting gesture: {e}")
+            return False
+
+    def fetch_logs(self):
+        """
+        Fetches all logs from the database.
+        Returns:
+            list: A list of tuples containing log data (id, gesture_id, timestamp).
+        """
+        try:
+            with sqlite3.connect(self.db_name) as conn, closing(conn.cursor()) as cursor:
+                cursor.execute('SELECT * FROM logs')
+                results = cursor.fetchall()
+                logger.info(f"Fetched {len(results)} logs from the database.")
+                return results
+        except sqlite3.Error as e:
+            logger.error(f"Error fetching logs: {e}")
+            return []

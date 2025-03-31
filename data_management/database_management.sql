@@ -1,6 +1,7 @@
 -- *****************************************************************************************************
 -- Database Schema for Wheelchair Control Gesture Tracking
 -- This script creates and ensures the necessary tables and relationships for storing gestures and logs.
+-- The database tracks gestures and actions, it has built-in integrity and performance improvements.
 -- *****************************************************************************************************
 
 -- Step 1: Temporarily disable foreign key checks to safely alter tables if needed
@@ -35,8 +36,3 @@ CREATE INDEX IF NOT EXISTS idx_gesture_name ON gestures(gesture_name);
 
 -- Step 5: Re-enable foreign key checks to maintain database integrity
 PRAGMA foreign_keys = ON;
-
--- *******************************************************
--- The database tracks gestures and actions.           
--- It has built-in integrity and performance improvements.
--- *******************************************************

@@ -96,6 +96,9 @@ class GestureRecognition:
             logger.error(f"Error during frame preprocessing: {e}", exc_info=True)
             raise ValueError("Frame preprocessing failed. Ensure the frame is correctly sized.")
 
+
+if __name__ == "__main__":
+
 # Initialize GestureRecognition
 gesture_recognizer = GestureRecognition(
     model_path="models/gesture_recognition_model.h5",

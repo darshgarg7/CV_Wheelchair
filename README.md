@@ -140,7 +140,7 @@ python3 -m unittest discover tests/
 
 The gesture recognition model is based on **MobileNet and EfficientNetLite**, which are lightweight, pre-trained CNNs optimized for efficiency and performance on resource-constrained devices. These models are fine-tuned for the specific task of gesture classification.
 
-# Fine Tuning
+## Fine Tuning
 
 - **Custom Output Layer**:  
   The final classification layer of the pre-trained model is replaced with a new dense layer tailored to the number of gesture classes (e.g., "Stop", "Go", "Turn Left", "Turn Right"). This ensures the model outputs predictions specific to the defined gestures.
@@ -151,7 +151,7 @@ The gesture recognition model is based on **MobileNet and EfficientNetLite**, wh
 - **EfficientNetLite**:  
   A lightweight variant of EfficientNet, optimized for TensorFlow Lite. It systematically scales model width, depth, and resolution to balance accuracy and performance, making it suitable for edge devices like Raspberry Pi.
 
-# Training Details
+## Training Details
 
 - **Training Dataset**:  
   A diverse dataset of hand gesture images labeled with corresponding gestures. To address class imbalances and improve robustness, synthetic data was generated using a **Conditional GAN**. This augmentation step enhanced the model's ability to generalize across different scenarios.
@@ -165,7 +165,7 @@ The gesture recognition model is based on **MobileNet and EfficientNetLite**, wh
 - **Loss Function**:  
   **Categorical crossentropy** was employed for multi-class classification, ensuring the model effectively learns to distinguish between the different gesture classes.
 
-# Additional Notes
+## Additional Notes
 
 - **Data Augmentation**:  
   Beyond Conditional GAN, traditional augmentation techniques like rotation, scaling, and flipping were applied to further diversify the training dataset.

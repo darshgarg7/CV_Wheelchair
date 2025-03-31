@@ -5,6 +5,7 @@ from queue import Queue
 import RPi.GPIO as GPIO
 import time
 from hand_tracking.gesture_recognition import GestureRecognition
+from data_management.database import DatabaseManager
 
 class WheelchairController:
     """
@@ -14,11 +15,8 @@ class WheelchairController:
         """
         Initializes the WheelchairController with required components.
         """
-        self.gesture_recognizer = GestureRecognition(
-            model_path=model_path,
-            confidence_threshold=0.7,
-            temperature=1.0
-        )
+        self.gesture_recognizer = GestureRecognition(model_path)
+        self.db_manager = DatabaseManager()  # Initialize DatabaseManager
         self.cap = cv2.VideoCapture(camera_index)
         self.frame_queue = Queue(maxsize=10)
         self._initialize_gpio()
@@ -61,10 +59,15 @@ class WheelchairController:
 
     def _handle_gesture(self, gesture: str) -> None:
         """
-        Handles the recognized gesture and triggers the appropriate wheelchair movement or action.
+        Handles the recognized gesture, triggers the appropriate action, and logs it into the database.
         """
         try:
             logging.info(f"Handling gesture: {gesture}")
+
+            # Log the gesture into the database
+            self.db_manager.save_gesture(gesture)
+
+            # Trigger the corresponding wheelchair action
             if gesture == "Stop":
                 self._stop_wheelchair()
             elif gesture == "Go":
@@ -75,6 +78,7 @@ class WheelchairController:
                 self._turn_wheelchair_right()
             else:
                 logging.warning(f"Unknown gesture: {gesture}")
+
         except Exception as e:
             logging.error(f"Error handling gesture: {e}")
 
@@ -125,6 +129,7 @@ class WheelchairController:
         cv2.destroyAllWindows()
         GPIO.cleanup()
 
+
 class GestureRecognitionThread(threading.Thread):
     """
     GestureRecognitionThread processes frames from the frame queue, makes gesture predictions,
@@ -149,6 +154,7 @@ class GestureRecognitionThread(threading.Thread):
                 if gesture:
                     logging.info(f"Recognized gesture: {gesture}")
                     self.wheelchair_controller._handle_gesture(gesture)
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

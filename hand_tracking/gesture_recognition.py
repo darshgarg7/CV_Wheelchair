@@ -95,3 +95,21 @@ class GestureRecognition:
         except Exception as e:
             logger.error(f"Error during frame preprocessing: {e}", exc_info=True)
             raise ValueError("Frame preprocessing failed. Ensure the frame is correctly sized.")
+
+# Initialize GestureRecognition
+gesture_recognizer = GestureRecognition(
+    model_path="models/gesture_recognition_model.h5",
+    confidence_threshold=0.7,
+    temperature=1.0
+)
+
+# Capture a frame from the camera
+frame = capture_frame_from_camera()
+
+# Predict the gesture
+recognized_gesture = gesture_recognizer.predict_gesture(frame)
+
+if recognized_gesture:
+    print(f"Recognized Gesture: {recognized_gesture}")
+else:
+    print("Gesture not recognized due to low confidence.")

@@ -22,18 +22,47 @@ The project aims to enhance accessibility and mobility for individuals with phys
 - **Flask**: Lightweight web framework for managing the API that interfaces with the wheelchair system.
 
 ## System Architecture
-```
-+---------------------+        +--------------------------+
-| Camera (Input)      | -----> | Gesture Recognition Model |
-+---------------------+        +--------------------------+
-                                   |
-                             +---------------------+
-                             | Wheelchair Controller|
-                             +---------------------+
-                                   |
-                              +---------------------+
-                              | Web Server (Flask)  |
-                              +---------------------+
+```mermaid
+graph TD
+    %% Main Components
+    User[User] -->|Performs Gestures| Camera[Camera]
+    Camera -->|Captures Frames| GestureRecognition[GestureRecognition]
+    GestureRecognition -->|Recognizes Gestures| WheelchairController[WheelchairController]
+    WheelchairController -->|Controls Motors| Wheelchair[Wheelchair]
+    WheelchairController -->|Logs Gestures| DatabaseManager[DatabaseManager]
+
+    %% Flask App Integration
+    FlaskApp[Flask App] -->|Serves Model| GestureRecognition
+    FlaskApp -->|Health Check| Kubernetes[Kubernetes Cluster]
+
+    %% DatabaseManager Interactions
+    DatabaseManager -->|CRUD Operations| SQLiteDB[SQLite Database]
+    SQLiteDB -->|Stores Gestures| GesturesTable[Gestures Table]
+    SQLiteDB -->|Stores Logs| LogsTable[Logs Table]
+
+    %% AWS S3 Integration
+    SQLiteDB -->|Uploads Data| AWSS3[AWS S3 Bucket]
+
+    %% MobileNet/EfficientNetLite and ConditionalGAN
+    MobileNetEfficientNetLite[MobileNet/EfficientNetLite] -->|Uses Model| GestureRecognition
+    ConditionalGAN -->|Augments Model| MobileNetEfficientNetLite
+    DatabaseManager -->|Provides Real Data| ConditionalGAN
+
+    %% DevContainer and Kubernetes
+    DevContainer[DevContainer] -->|Builds Image| Dockerfile[Dockerfile]
+    Dockerfile -->|Deploys to| Kubernetes
+    Kubernetes -->|Manages| FlaskApp
+
+    %% Notes
+    classDef main fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef db fill:#bbf,stroke:#333,stroke-width:2px;
+    classDef model fill:#fbb,stroke:#333,stroke-width:2px;
+    classDef devops fill:#bfb,stroke:#333,stroke-width:2px;
+
+    class User,Camera,GestureRecognition,WheelchairController,Wheelchair main
+    class DatabaseManager,SQLiteDB,GesturesTable,LogsTable db
+    class ConditionalGAN,MobileNetEfficientNetLite,Generator,Discriminator model
+    class DevContainer,Dockerfile,Kubernetes,AWSS3,FlaskApp devops
 ```
 
 ### Components:

@@ -17,8 +17,7 @@ CREATE TABLE IF NOT EXISTS gestures (
     id INTEGER PRIMARY KEY AUTOINCREMENT,            -- Unique identifier for each gesture
     name TEXT NOT NULL UNIQUE,                       -- Gesture name (e.g., 'Swipe Left', 'Swipe Up')
     command TEXT NOT NULL,                           -- Command associated with the gesture (e.g., 'Move Forward')
-    coordinates TEXT NOT NULL,                       -- Gesture coordinates (stored as JSON string for flexibility)
-    CONSTRAINT unique_gesture UNIQUE(name)           -- Ensures each gesture name is unique
+    coordinates TEXT NOT NULL                        -- Gesture coordinates (stored as JSON string for flexibility)
 );
 
 -- Step 3: Create the 'logs' table (if not already existing)
@@ -30,9 +29,10 @@ CREATE TABLE IF NOT EXISTS logs (
     FOREIGN KEY (gesture_id) REFERENCES gestures(id) ON DELETE CASCADE  -- Ensures logs are deleted when related gesture is removed
 );
 
--- Step 4: Improve performance by creating an index on the 'timestamp' column of the logs table
-CREATE INDEX IF NOT EXISTS idx_logs_timestamp ON logs (timestamp);
-CREATE INDEX IF NOT EXISTS idx_gesture_name ON gestures(gesture_name);
+-- Step 4: Improve performance by creating indexes
+CREATE INDEX IF NOT EXISTS idx_gesture_name ON gestures(name);
+CREATE INDEX IF NOT EXISTS idx_logs_timestamp ON logs(timestamp);
+CREATE INDEX IF NOT EXISTS idx_logs_gesture_id ON logs(gesture_id);
 
 -- Step 5: Re-enable foreign key checks to maintain database integrity
 PRAGMA foreign_keys = ON;
